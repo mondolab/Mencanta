@@ -16,7 +16,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "opa"
-database_id = "REEMPLAZAR_CON_DATABASE_ID"
+database_id = "f49b65da-9b25-4219-ae68-2e59c964a616"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
