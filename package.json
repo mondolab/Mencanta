@@ -1,0 +1,41 @@
+{
+  "name": "opa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "M' encanta — Blanquería + Tienda online + Gestión del negocio (Cloudflare Workers + Hono + D1 + R2)",
+  "scripts": {
+    "dev": "concurrently -n worker,web -c yellow,cyan \"npm:dev:worker\" \"npm:dev:web\"",
+    "dev:worker": "wrangler dev",
+    "dev:web": "vite",
+    "build": "vite build && tsc -p tsconfig.worker.json --noEmit",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply opa --remote",
+    "db:migrate:local": "wrangler d1 migrations apply opa --local",
+    "cf:types": "wrangler types"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.0",
+    "hono": "^4.6.14",
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.0.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "wrangler": "^4.0.0"
+  }
+}

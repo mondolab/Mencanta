@@ -1,0 +1,6 @@
+# Copiá este archivo a .dev.vars y completá con tus datos locales.
+# Estas credenciales crean el administrador automáticamente en el primer login.
+ADMIN_EMAIL=admin@mencanta.com.ar
+ADMIN_PASSWORD=CambiarEstaClave
+# Habilitá esto solo si querés crear el admin desde el setup (/api/auth/setup).
+ADMIN_SETUP_KEY=

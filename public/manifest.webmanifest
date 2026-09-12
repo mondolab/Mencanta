@@ -1,0 +1,22 @@
+{
+  "name": "M' encanta — Blanquería y accesorios",
+  "short_name": "M' encanta",
+  "description": "Blanquería para el hogar y accesorios de acero quirúrgico en Paraná, Entre Ríos. Showroom y envíos a domicilio.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F7",
+  "theme_color": "#FAF9F7",
+  "lang": "es-AR",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

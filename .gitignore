@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+.wrangler/
+*.tsbuildinfo
+
+# Entorno
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# Wrangler local
+.dev.vars
+node_modules/
+dist/
+.env
+.env.*
+.dev.var
+.dev.vars
+.wrangler/

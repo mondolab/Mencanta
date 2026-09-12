@@ -1,0 +1,52 @@
+name = "opa"
+main = "worker/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================================
+# Ajustá estos valores al crear la base de datos y el bucket en
+# tu cuenta de Cloudflare (ver README.md).
+#
+#   pnpm/wrangler d1 create opa
+#   pnpm/wrangler r2 bucket create opa-bucket
+#
+# Luego copiá el database_id real en la línea de abajo.
+# ============================================================
+
+[[d1_databases]]
+binding = "DB"
+database_name = "opa"
+database_id = "REEMPLAZAR_CON_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "opa-bucket"
+
+# ============================================================
+# Frontend estático (build de Vite) servido por el mismo Worker
+# ============================================================
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# ============================================================
+# Secretos (nunca commitear). Configurar con:
+#   wrangler secret put ADMIN_SETUP_KEY
+# opcionalmente:
+#   wrangler secret put ADMIN_EMAIL
+#   wrangler secret put ADMIN_PASSWORD
+# ============================================================
+
+# Variables de entorno no sensibles (usar settings en la base si es configurable)
+[vars]
+ENVIRONMENT = "production"
+
+# ============================================================
+# Rutas / dominio (descomentar al conectar el dominio)
+# ============================================================
+# routes = [
+#   { pattern = "opa.com.ar", custom_domain = true },
+#   { pattern = "www.opa.com.ar", custom_domain = true },
+# ]
