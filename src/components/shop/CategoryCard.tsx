@@ -7,9 +7,9 @@ export function CategoryCard({ category }: { category: Category }) {
       to={`/productos?categoria=${category.slug}`}
       className="group relative flex aspect-[4/5] items-end overflow-hidden rounded-3xl border border-line bg-beige/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
     >
-      {category.image_url || category.image_key ? (
+      {category.image_url ? (
         <img
-          src={category.image_key ? `/api/files/${category.image_key}` : (category.image_url ?? '')}
+          src={category.image_url}
           alt={category.name}
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

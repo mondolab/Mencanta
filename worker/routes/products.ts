@@ -54,8 +54,7 @@ productsRoutes.get('/', async (c) => {
 
   const { results } = await c.env.DB.prepare(
     `SELECT p.*, c.name AS category_name,
-       (SELECT pi.image_key FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_key,
-       (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_url
+(SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_url
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
      WHERE ${where.join(' AND ')}
@@ -80,7 +79,7 @@ productsRoutes.get('/', async (c) => {
     has_variants: r.has_variants === 1,
     created_at: r.created_at,
     updated_at: r.updated_at,
-    image: { url: resolveImageUrl(r.image_key as string | null, r.image_url as string | null) },
+    image: { url: resolveImageUrl(r.image_url as string | null) },
   }))
   return c.json({ success: true, data })
 })
@@ -99,7 +98,7 @@ productsRoutes.get('/:id', async (c) => {
   if (!row) throw notFound('El producto no existe.')
 
   const images = (await c.env.DB.prepare(
-    'SELECT id, image_key, image_url, alt, sort_order FROM product_images WHERE product_id = ? ORDER BY sort_order, id',
+    'SELECT id, image_url, alt, sort_order FROM product_images WHERE product_id = ? ORDER BY sort_order, id',
   )
     .bind(id)
     .all()).results ?? []
@@ -119,9 +118,7 @@ productsRoutes.get('/:id', async (c) => {
       has_variants: row.has_variants === 1,
       images: images.map((img: Record<string, unknown>) => ({
         id: img.id,
-        image_key: img.image_key,
-        image_url: img.image_url,
-        url: resolveImageUrl(img.image_key as string | null, img.image_url as string | null),
+        url: resolveImageUrl(img.image_url as string | null),
         alt: img.alt,
         sort_order: img.sort_order,
       })),
@@ -167,9 +164,9 @@ productsRoutes.post('/', async (c) => {
   // Imágenes
   for (const img of input.images) {
     await c.env.DB.prepare(
-      'INSERT INTO product_images (product_id, image_key, image_url, alt, sort_order) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO product_images (product_id, image_url, alt, sort_order) VALUES (?, ?, ?, ?)',
     )
-      .bind(productId, img.image_key ?? null, img.image_url ?? null, img.alt, img.sort_order)
+      .bind(productId, img.image_url ?? null, img.alt, img.sort_order)
       .run()
   }
 
@@ -272,9 +269,8 @@ productsRoutes.put('/:id', async (c) => {
   for (const img of input.images) {
     stmts.push(
       B(
-        'INSERT INTO product_images (product_id, image_key, image_url, alt, sort_order) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO product_images (product_id, image_url, alt, sort_order) VALUES (?, ?, ?, ?)',
         id,
-        img.image_key ?? null,
         img.image_url ?? null,
         img.alt,
         img.sort_order,

@@ -20,7 +20,6 @@ export const setupSchema = loginSchema.extend({
 })
 
 export const imageInputSchema = z.object({
-  image_key: z.string().optional().nullable(),
   image_url: z.string().url('URL inválida.').optional().nullable(),
   alt: z.string().max(255).default(''),
   sort_order: z.number().int().min(0).default(0),
@@ -31,7 +30,6 @@ export const categoryInputSchema = z.object({
   slug: z.string().optional(),
   type: z.enum(['blanqueria', 'acero', 'otros']).default('blanqueria'),
   description: z.string().max(2000).default(''),
-  image_key: z.string().optional().nullable(),
   image_url: z.string().url('URL inválida.').optional().nullable(),
   sort_order: z.number().int().min(0).default(0),
   active: z.coerce.boolean().default(true),

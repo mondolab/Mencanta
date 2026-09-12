@@ -47,8 +47,8 @@ export default function SettingsPage() {
     if (!file || !form) return
     setUploading(true)
     try {
-      const { url, key } = await uploadImageFile(file, 'banners')
-      setForm({ ...form, hero_image: { url, key } })
+      const { url } = await uploadImageFile(file, 'banners')
+      setForm({ ...form, hero_image: { url } })
     } catch (err) {
       toast(err instanceof Error ? err.message : 'No se pudo subir la imagen.', 'error')
     } finally {
@@ -144,21 +144,33 @@ export default function SettingsPage() {
 
         <Card className="space-y-4 p-6">
           <h2 className="font-display text-lg font-semibold">Imagen hero</h2>
-          <div className="flex items-center gap-4">
-            {form.hero_image?.url && (
+          <Input
+            label="URL de la imagen"
+            value={form.hero_image?.url ?? ''}
+            onChange={(e) => patch('hero_image', { url: e.target.value })}
+            placeholder="https://…"
+            hint="Subí un archivo desde la computadora o pegá una URL directa."
+          />
+          {form.hero_image?.url && (
+            <div className="flex items-center gap-3">
               <img src={form.hero_image.url} alt="Hero" className="h-28 w-24 rounded-2xl border border-line object-cover" />
-            )}
-            <label className="flex h-16 cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-line px-4 text-xs font-semibold text-gray-500 hover:border-sand hover:bg-beige/30">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {form.hero_image?.url ? 'Reemplazar imagen' : 'Subir imagen'}
-              <input type="file" accept="image/*" className="hidden" onChange={onUploadHero} />
-            </label>
-            {form.hero_image?.url && (
-              <button onClick={() => patch('hero_image', { url: null, key: null })} className="text-xs font-semibold text-red-600 hover:underline">
+              <label className="flex h-10 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-white px-3 text-xs font-semibold text-ink hover:border-sand hover:bg-beige/40">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {form.hero_image?.url ? 'Reemplazar' : 'Subir'}
+                <input type="file" accept="image/*" className="hidden" onChange={onUploadHero} />
+              </label>
+              <button onClick={() => patch('hero_image', { url: null })} className="text-xs font-semibold text-red-600 hover:underline">
                 Quitar
               </button>
-            )}
-          </div>
+            </div>
+          )}
+          {!form.hero_image?.url && (
+            <label className="flex h-10 cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-line px-4 text-xs font-semibold text-gray-500 hover:border-sand hover:bg-beige/30">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? 'Subiendo…' : 'Subir imagen'}
+              <input type="file" accept="image/*" className="hidden" onChange={onUploadHero} />
+            </label>
+          )}
         </Card>
       </div>
 

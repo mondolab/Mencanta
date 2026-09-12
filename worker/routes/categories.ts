@@ -19,15 +19,14 @@ categoriesRoutes.post('/', async (c) => {
   const input = parsed.data
   const slug = input.slug ? await ensureSlug(c, input.slug) : await uniqueSlug(c.env.DB, 'categories', input.name)
   const res = await c.env.DB.prepare(
-    `INSERT INTO categories (name, slug, type, description, image_key, image_url, sort_order, active)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO categories (name, slug, type, description, image_url, sort_order, active)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       input.name.trim(),
       slug,
       input.type,
       input.description,
-      input.image_key ?? null,
       input.image_url ?? null,
       input.sort_order,
       input.active ? 1 : 0,
@@ -53,7 +52,7 @@ categoriesRoutes.put('/:id', async (c) => {
     : existing.slug
 
   await c.env.DB.prepare(
-    `UPDATE categories SET name = ?, slug = ?, type = ?, description = ?, image_key = ?, image_url = ?, sort_order = ?, active = ?, updated_at = datetime('now')
+    `UPDATE categories SET name = ?, slug = ?, type = ?, description = ?, image_url = ?, sort_order = ?, active = ?, updated_at = datetime('now')
      WHERE id = ?`,
   )
     .bind(
@@ -61,7 +60,6 @@ categoriesRoutes.put('/:id', async (c) => {
       slug,
       input.type,
       input.description,
-      input.image_key ?? null,
       input.image_url ?? null,
       input.sort_order,
       input.active ? 1 : 0,

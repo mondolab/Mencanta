@@ -1,11 +1,11 @@
 export interface Env {
   DB: D1Database
-  BUCKET: R2Bucket
   ASSETS: Fetcher
   ENVIRONMENT?: string
   ADMIN_SETUP_KEY?: string
   ADMIN_EMAIL?: string
   ADMIN_PASSWORD?: string
+  GITHUB_TOKEN?: string
 }
 
 export interface UserRow {

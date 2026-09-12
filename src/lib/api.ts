@@ -77,7 +77,7 @@ export const api = {
   },
 }
 
-/** Sube una imagen a R2 y devuelve su clave y URL pública. */
+/** Sube una imagen a R2 y devuelve su URL pública (el nombre lo genera el sistema). */
 export async function uploadImageFile(file: File, folder: string): Promise<{ key: string; url: string }> {
   const formData = new FormData()
   formData.append('file', file)

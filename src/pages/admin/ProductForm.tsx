@@ -32,7 +32,6 @@ interface VariantRow {
 interface ImageRow {
   id?: number
   url: string
-  key?: string | null
   alt: string
 }
 
@@ -49,7 +48,7 @@ interface ProductDetailData {
   featured: boolean
   active: boolean
   has_variants: boolean
-  images: Array<{ id: number; url: string | null; image_key: string | null; alt: string }>
+  images: Array<{ id: number; url: string | null; alt: string }>
   variants: Array<{ id: number; name: string; size: string; color: string; price_cents: number | null; compare_price_cents: number | null; cost_cents: number | null; stock: number; active: boolean }>
 }
 
@@ -78,6 +77,8 @@ export default function ProductForm() {
   const [active, setActive] = useState(true)
   const [hasVariants, setHasVariants] = useState(false)
   const [images, setImages] = useState<ImageRow[]>([])
+  const [newImageUrl, setNewImageUrl] = useState('')
+  const [newImageAlt, setNewImageAlt] = useState('')
   const [deleteImageIds, setDeleteImageIds] = useState<number[]>([])
   const [variants, setVariants] = useState<VariantRow[]>([])
   const [uploading, setUploading] = useState(false)
@@ -108,7 +109,7 @@ export default function ProductForm() {
     setFeatured(detail.featured)
     setActive(detail.active)
     setHasVariants(detail.has_variants)
-    setImages((detail.images ?? []).map((img) => ({ id: img.id, url: img.url ?? '', key: img.image_key, alt: img.alt })))
+    setImages((detail.images ?? []).map((img) => ({ id: img.id, url: img.url ?? '', alt: img.alt })))
     setVariants(
       (detail.variants ?? []).map((v) => ({
         id: v.id,
@@ -136,6 +137,29 @@ export default function ProductForm() {
     }
   }, [hasVariants]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const addImage = () => {
+    const url = newImageUrl.trim()
+    if (!url) return
+    setImages((prev) => [...prev, { url, alt: newImageAlt.trim() }])
+    setNewImageUrl('')
+    setNewImageAlt('')
+  }
+
+  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const { url } = await uploadImageFile(file, 'products')
+      setImages((prev) => [...prev, { url, alt: '' }])
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'No se pudo subir la imagen.', 'error')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
   const save = useMutation({
     mutationFn: () => {
       const payload = {
@@ -153,7 +177,7 @@ export default function ProductForm() {
         has_variants: hasVariants,
         images: images
           .filter((img) => !img.id)
-          .map((img, i) => ({ image_key: img.key ?? null, image_url: img.url, alt: img.alt, sort_order: i })),
+          .map((img, i) => ({ image_url: img.url, alt: img.alt, sort_order: i })),
         delete_image_ids: deleteImageIds,
         variants: hasVariants
           ? variants.map((v) => ({
@@ -182,21 +206,6 @@ export default function ProductForm() {
     },
     onError: (err) => toast(err instanceof Error ? err.message : 'No se pudo guardar el producto.', 'error'),
   })
-
-  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    try {
-      const { url, key } = await uploadImageFile(file, 'products')
-      setImages((prev) => [...prev, { url, key, alt: '' }])
-    } catch (err) {
-      toast(err instanceof Error ? err.message : 'No se pudo subir la imagen.', 'error')
-    } finally {
-      setUploading(false)
-      e.target.value = ''
-    }
-  }
 
   if (isEdit && detailLoading) return <LoadingState />
 
@@ -324,7 +333,16 @@ export default function ProductForm() {
                 <input type="file" accept="image/*" className="hidden" onChange={onUpload} />
               </label>
             </div>
-            <p className="text-xs text-gray-500">Las imágenes se suben a R2 y se sirven desde /api/files/.</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="sm:flex-1">
+                <Input label="o por URL" value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} placeholder="https://…" />
+              </div>
+              <Input label="Texto alternativo" value={newImageAlt} onChange={(e) => setNewImageAlt(e.target.value)} placeholder="Descripción breve" />
+              <Button variant="outline" onClick={addImage} disabled={!newImageUrl.trim()}>
+                <Plus className="h-4 w-4" /> Agregar
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">Subí el archivo (el sistema genera el nombre) o pegá una URL directa. La primera imagen es la principal.</p>
           </Card>
         </div>
 

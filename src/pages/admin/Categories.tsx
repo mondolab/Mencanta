@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Upload, Loader2 } from 'lucide-react'
 import { api, uploadImageFile } from '@/lib/api'
 import type { Category } from '@/types'
 import { slugify } from '@/lib/utils'
@@ -29,7 +29,7 @@ export default function Categories() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const [form, setForm] = useState<{ id?: number; name: string; slug: string; type: CategoryRow['type']; description: string; sort_order: string; active: boolean; image?: { url: string; key?: string | null } | null } | null>(null)
+  const [form, setForm] = useState<{ id?: number; name: string; slug: string; type: CategoryRow['type']; description: string; sort_order: string; active: boolean; imageUrl: string } | null>(null)
   const [toDelete, setToDelete] = useState<CategoryRow | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -64,8 +64,8 @@ export default function Categories() {
     if (!file || !form) return
     setUploading(true)
     try {
-      const { url, key } = await uploadImageFile(file, 'categories')
-      setForm((f) => (f ? { ...f, image: { url, key } } : f))
+      const { url } = await uploadImageFile(file, 'categories')
+      setForm((f) => (f ? { ...f, imageUrl: url } : f))
     } catch (err) {
       toast(err instanceof Error ? err.message : 'No se pudo subir la imagen.', 'error')
     } finally {
@@ -84,8 +84,7 @@ export default function Categories() {
       slug: form.id ? (form.slug !== (data?.find((c) => c.id === form.id)?.slug ?? form.slug) ? form.slug : '') : form.slug || '',
       type: form.type,
       description: form.description,
-      image_key: form.image?.key ?? null,
-      image_url: form.image?.url ?? null,
+      image_url: form.imageUrl.trim() || null,
       sort_order: Number(form.sort_order) || 0,
       active: form.active,
     })
@@ -98,7 +97,7 @@ export default function Categories() {
           <h1 className="font-display text-2xl font-semibold">Categorías</h1>
           <p className="text-sm text-gray-500">Organizan el catálogo en la tienda.</p>
         </div>
-        <Button onClick={() => setForm({ name: '', slug: '', type: 'blanqueria', description: '', sort_order: String((data ?? []).length), active: true, image: null })}>
+        <Button onClick={() => setForm({ name: '', slug: '', type: 'blanqueria', description: '', sort_order: String((data ?? []).length), active: true, imageUrl: '' })}>
           <Plus className="h-4 w-4" /> Nueva categoría
         </Button>
       </div>
@@ -112,7 +111,7 @@ export default function Categories() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-beige/50">
-                    {c.image_url || c.image_key ? (
+                    {c.image_url ? (
                       <img src={c.image_url ?? ''} alt={c.name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center font-display text-lg text-sand/60">{c.name.charAt(0)}</div>
@@ -124,7 +123,7 @@ export default function Categories() {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button onClick={() => setForm({ id: c.id, name: c.name, slug: c.slug, type: c.type, description: c.description, sort_order: String(c.sort_order), active: c.active, image: c.image_url ? { url: c.image_url, key: c.image_key ?? null } : null })} className="rounded-full p-2 text-gray-500 hover:bg-beige/50 hover:text-ink" aria-label="Editar">
+                  <button onClick={() => setForm({ id: c.id, name: c.name, slug: c.slug, type: c.type, description: c.description, sort_order: String(c.sort_order), active: c.active, imageUrl: c.image_url ?? '' })} className="rounded-full p-2 text-gray-500 hover:bg-beige/50 hover:text-ink" aria-label="Editar">
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button onClick={() => setToDelete(c)} className="rounded-full p-2 text-gray-500 hover:bg-red-50 hover:text-red-600" aria-label="Eliminar">
@@ -169,21 +168,25 @@ export default function Categories() {
               </div>
             </div>
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-600">Imagen</p>
-              <div className="flex items-center gap-3">
-                {form.image?.url && (
-                  <img src={form.image.url} alt={form.name} className="h-16 w-16 rounded-2xl border border-line object-cover" />
-                )}
-                <label className="flex h-16 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-line px-4 text-xs font-semibold text-gray-500 hover:border-sand hover:bg-beige/30">
+              <Input label="URL de imagen" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://…" hint="Subí un archivo desde la computadora o pegá una URL." />
+              {form.imageUrl && (
+                <div className="mt-2 flex items-center gap-3">
+                  <img src={form.imageUrl} alt={form.name} className="h-16 w-16 rounded-2xl border border-line object-cover" />
+                  <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-white px-3 text-xs font-semibold text-ink hover:border-sand hover:bg-beige/40">
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Subir
+                    <input type="file" accept="image/*" className="hidden" onChange={onUpload} />
+                  </label>
+                  <button onClick={() => setForm({ ...form, imageUrl: '' })} className="text-xs font-semibold text-red-600 hover:underline">Quitar</button>
+                </div>
+              )}
+              {!form.imageUrl && (
+                <label className="mt-2 flex h-10 cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-line px-4 text-xs font-semibold text-gray-500 hover:border-sand hover:bg-beige/30">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   {uploading ? 'Subiendo…' : 'Subir imagen'}
                   <input type="file" accept="image/*" className="hidden" onChange={onUpload} />
                 </label>
-                {form.image && (
-                  <button onClick={() => setForm({ ...form, image: null })} className="text-xs font-semibold text-red-600 hover:underline">
-                    Quitar
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         )}

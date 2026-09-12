@@ -4,11 +4,10 @@ compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
 # ============================================================
-# Ajustá estos valores al crear la base de datos y el bucket en
-# tu cuenta de Cloudflare (ver README.md).
+# Ajustá este valor al crear la base de datos en tu cuenta de
+# Cloudflare (ver README.md).
 #
 #   pnpm/wrangler d1 create opa
-#   pnpm/wrangler r2 bucket create opa-bucket
 #
 # Luego copiá el database_id real en la línea de abajo.
 # ============================================================
@@ -19,9 +18,8 @@ database_name = "opa"
 database_id = "f49b65da-9b25-4219-ae68-2e59c964a616"
 migrations_dir = "migrations"
 
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "opa-bucket"
+# Imágenes subidas desde el panel (R2 tiene cuota gratis: 10 GB, sin egress).
+
 
 # ============================================================
 # Frontend estático (build de Vite) servido por el mismo Worker

@@ -11,7 +11,6 @@ export interface Category {
   slug: string
   type: 'blanqueria' | 'acero' | 'otros'
   description: string
-  image_key?: string | null
   image_url?: string | null
   sort_order: number
   active: boolean
@@ -23,8 +22,6 @@ export interface ProductImage {
   id: number
   url: string | null
   alt: string
-  image_key?: string | null
-  image_url?: string | null
   sort_order?: number
 }
 
@@ -217,7 +214,7 @@ export interface Settings {
   shipping: { zones: string; cost_cents: number; min_order_free_cents: number; cost_note: string; delivery_time: string; pickup: boolean }
   schedule: { title: string; lines: string[] }
   texts: { hero_title: string; hero_subtitle: string; hero_text: string; banner_title: string; banner_text: string }
-  hero_image: { url: string | null; key?: string | null }
+  hero_image: { url: string | null }
   invoice?: { tax_id?: string; footer?: string }
   rules?: { allow_negative_stock?: boolean }
   [key: string]: unknown

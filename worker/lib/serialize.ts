@@ -4,8 +4,7 @@ export interface ProductImageDto {
   alt: string
 }
 
-export function resolveImageUrl(key?: string | null, url?: string | null): string | null {
-  if (key) return `/api/files/${key}`
+export function resolveImageUrl(url?: string | null): string | null {
   return url ?? null
 }
 
@@ -26,7 +25,6 @@ export interface ProductRow {
   featured: number
   active: number
   has_variants: number
-  image_key?: string | null
   image_url?: string | null
   created_at: string
   updated_at: string
@@ -48,7 +46,7 @@ export function serializePublicProduct(row: ProductRow): Record<string, unknown>
     featured: row.featured === 1,
     active: row.active === 1,
     image: {
-      url: resolveImageUrl(row.image_key, row.image_url),
+      url: resolveImageUrl(row.image_url),
     },
     discount_percent: discountPercent(row.price_cents, row.compare_price_cents),
     is_offer: row.compare_price_cents != null

@@ -34,7 +34,7 @@ publicApi.get('/categories', async (c) => {
     slug: r.slug,
     type: r.type,
     description: r.description,
-    image: { url: resolveImageUrl(r.image_key as string | null, r.image_url as string | null) },
+    image: { url: resolveImageUrl(r.image_url as string | null) },
   }))
   return c.json({ success: true, data })
 })
@@ -101,7 +101,6 @@ publicApi.get('/products', async (c) => {
   const totalRow = await c.env.DB.prepare(totalSql).bind(...params).first<{ c: number }>()
 
   const sql = `SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.type AS category_type,
-     (SELECT pi.image_key FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_key,
      (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_url
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      WHERE ${where.join(' AND ')} ORDER BY ${order} LIMIT ? OFFSET ?`
@@ -126,10 +125,10 @@ publicApi.get('/products/:slug', async (c) => {
   if (!row) throw notFound('El producto no existe.')
 
   const images = await c.env.DB.prepare(
-    'SELECT id, image_key, image_url, alt FROM product_images WHERE product_id = ? ORDER BY sort_order, id',
+    'SELECT id, image_url, alt FROM product_images WHERE product_id = ? ORDER BY sort_order, id',
   )
     .bind(row.id)
-    .all<{ id: number; image_key: string | null; image_url: string | null; alt: string }>()
+    .all<{ id: number; image_url: string | null; alt: string }>()
 
   const variants = row.has_variants === 1
     ? await c.env.DB.prepare(
@@ -143,7 +142,7 @@ publicApi.get('/products/:slug', async (c) => {
     ...serializePublicProduct(row),
     gallery: (images.results ?? []).map((img) => ({
       id: img.id,
-      url: resolveImageUrl(img.image_key, img.image_url),
+      url: resolveImageUrl(img.image_url),
       alt: img.alt || row.name,
     })),
     variants: (variants.results ?? []).map((v: Record<string, unknown>) => ({
@@ -170,7 +169,6 @@ publicApi.get('/home', async (c) => {
 
   const featuredRows = await c.env.DB.prepare(
     `SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.type AS category_type,
-      (SELECT pi.image_key FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_key,
       (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.id LIMIT 1) AS image_url
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      WHERE p.active = 1 AND p.featured = 1
@@ -189,7 +187,7 @@ publicApi.get('/home', async (c) => {
         name: r.name,
         slug: r.slug,
         type: r.type,
-        image: { url: resolveImageUrl(r.image_key as string | null, r.image_url as string | null) },
+image: { url: resolveImageUrl(r.image_url as string | null) },
       })),
       featured: (featuredRows.results ?? []).map(serializePublicProduct),
     },

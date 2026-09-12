@@ -1,6 +1,6 @@
 # M' encanta — Tienda y gestión
 
-E-commerce + panel de administración para **M' encanta**, blanquería y acero quirúrgico en Paraná, Entre Ríos. Todo el stack corre en Cloudflare: Hono en Workers, D1 (SQLite), R2 (imágenes) y el frontend de React/Vite servido por el mismo Worker.
+E-commerce + panel de administración para **M' encanta**, blanquería y acero quirúrgico en Paraná, Entre Ríos. Todo el stack corre en Cloudflare: Hono en Workers, D1 (SQLite), assets estáticos (frontend de React/Vite servido por el mismo Worker) y R2 para las imágenes subidas desde el panel (tiene **cuota gratis**: 10 GB de almacenamiento y sin cargo por descargas).
 
 ## Stack
 
@@ -9,7 +9,7 @@ E-commerce + panel de administración para **M' encanta**, blanquería y acero q
 | Frontend | React 18 + Vite + TypeScript + Tailwind CSS + TanStack Query + React Router |
 | Backend | Cloudflare Workers + Hono + Zod |
 | Datos | Cloudflare D1 (SQLite) con migraciones versionadas |
-| Archivos | Cloudflare R2 (imágenes de productos, categorías, banners) |
+| Imágenes | Subida desde el panel a Cloudflare R2 (cuota gratis, sin egress) o URL directa |
 | PWA | `manifest.webmanifest` + Service Worker (`public/sw.js`) |
 
 ## Estructura
@@ -33,7 +33,7 @@ wrangler.toml      Config del Worker + D1 + R2 + assets
 
 ## Puesta en marcha local
 
-Requisitos: Node 20+ y una cuenta de Cloudflare (para D1/R2 remotas y deploys).
+Requisitos: Node 20+ y una cuenta de Cloudflare (para la D1 y R2 remotas y los deploys).
 
 ```bash
 npm install
@@ -85,7 +85,7 @@ npm run deploy         # build + wrangler deploy
 
 ## Configuración del negocio
 
-Todo se edita desde **Configuración** en el panel (`/admin/configuracion`): datos del negocio, WhatsApp, contacto/ubicación, envíos, horarios, textos de la home e imagen hero. Los montos se guardan como enteros en centavos (`*_cents`).
+Todo se edita desde **Configuración** en el panel (`/admin/configuracion`): datos del negocio, WhatsApp, contacto/ubicación, envíos, horarios, textos de la home e imagen hero. Las imágenes de productos/categorías/hero se **suben desde el panel** (se guardan en R2 con nombre generado automáticamente) o se pegan por URL directa. Los montos se guardan como enteros en centavos (`*_cents`).
 
 ## Convenciones
 
